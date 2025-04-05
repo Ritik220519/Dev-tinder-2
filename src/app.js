@@ -5,6 +5,9 @@ const app = express();
 app.use('/test', (req , res)=>{
     res.send("hello test command")
 })
+app.use('/node', (req , res)=>{
+    res.send("hello node js ")
+})
 app.use('/', (req , res)=>{
     res.send("hello dashboard")
 })
