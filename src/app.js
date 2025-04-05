@@ -1,17 +1,34 @@
-const express = require('express');
+const express = require("express");
 const app = express();
 
+// order of the routes matters a lot
 
-app.use('/test', (req , res)=>{
-    res.send("hello test command")
+// this will handle the GET call /user
+app.get('/user' , (req , res)=>{
+    res.send({name: "Ritik" , lastName : "srivastava"}).status(200)
 })
-app.use('/node', (req , res)=>{
-    res.send("hello node js ")
-})
-app.use('/', (req , res)=>{
-    res.send("hello dashboard")
+// this will handle the POST call /user
+app.post("/user" , async(req , res) =>{
+res.send("successfully send data to database.");
 })
 
-app.listen(7777 , () =>{
-    console.log('server is listining on port 7777')
+// this will handle the DELETE call /user
+app.delete('/user' , (req, res) =>{
+    res.send("successfully deleted data from database.")
 })
+
+
+
+
+
+
+
+
+// this will match all the http methods API call to this path
+app.use("/node/express", (req, res) => {
+    res.send("hello express js ");
+  });
+
+app.listen(7777, () => {
+  console.log("server is listining on port 7777");
+});
