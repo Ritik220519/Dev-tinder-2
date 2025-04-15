@@ -41,16 +41,47 @@ app.get("/feed", async (req, res) => {
   try {
     const users = await User.find({});
 
-    if(! users){
+    if (!users) {
       res.status(400).send("No users found");
-    }else{
+    } else {
       res.send(users);
     }
-
   } catch (error) {
-
     res.status(400).send("something went wrong" + error.message);
+  }
+});
 
+// delete API for one user
+
+app.delete("/user", async (req, res) => {
+  const userId = req.body.userId;
+  try {
+    const user = await User.findByIdAndDelete({ _id: userId });
+    if (!user) {
+      res.status(400).send("user not Available");
+    } else {
+      res.send("User deleted successfully");
+    }
+  } catch (error) {
+    res.send("something went wrong" + error.message);
+  }
+});
+
+// update API for one user
+app.patch("/user", async (req, res) => {
+  
+  const userId = req.body.userId;
+  const data = req.body;
+  try {
+    const user =  await User.findByIdAndUpdate({_id: userId }, data , {returnDocument : "before"});
+    console.log(user);
+    if (!user) {
+      res.status(400).send("user not found");
+    } else {
+      res.send("User updated successfully");
+    }
+  } catch (error) {
+    res.send("something went wrong" + error.message);
   }
 });
 
