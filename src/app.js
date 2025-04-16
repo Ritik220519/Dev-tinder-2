@@ -1,7 +1,6 @@
 const express = require("express");
 const { connectDB } = require("./config/database");
 const User = require("./model/user");
-const user = require("./model/user");
 const app = express();
 
 // Middleware to convert JSON data to JS object
@@ -73,8 +72,8 @@ app.patch("/user", async (req, res) => {
   const userId = req.body.userId;
   const data = req.body;
   try {
-    const user =  await User.findByIdAndUpdate({_id: userId }, data , {returnDocument : "before"});
-    console.log(user);
+    const user =  await User.findByIdAndUpdate({_id: userId }, data , {returnDocument : "before" , runValidators : true});
+    // console.log(user);
     if (!user) {
       res.status(400).send("user not found");
     } else {
