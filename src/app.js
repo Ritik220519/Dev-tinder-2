@@ -67,12 +67,37 @@ app.delete("/user", async (req, res) => {
 });
 
 // update API for one user
-app.patch("/user", async (req, res) => {
-  
-  const userId = req.body.userId;
+app.patch("/user/:userId", async (req, res) => {
+  const userId = req.params?.userId;
+  console.log(userId)
   const data = req.body;
+
   try {
-    const user =  await User.findByIdAndUpdate({_id: userId }, data , {returnDocument : "before" , runValidators : true});
+    const ALLOWED_UPDATES = [
+      "userId",
+      "age",
+      "about",
+      "gender",
+      "photoUrl",
+      "skills",
+    ];
+
+    const isUpdateAllowed = Object
+      .keys(data)
+      .every((k) => ALLOWED_UPDATES.includes(k));
+
+    if (!isUpdateAllowed) {
+      throw new Error("Invalid update data");
+    }
+
+    if(data.skills.length > 10){
+      throw new Error("You can add only 10 skills")
+
+    }
+    const user = await User.findByIdAndUpdate({ _id: userId }, data, {
+      returnDocument: "before",
+      runValidators: true,
+    });
     // console.log(user);
     if (!user) {
       res.status(400).send("user not found");
@@ -80,7 +105,7 @@ app.patch("/user", async (req, res) => {
       res.send("User updated successfully");
     }
   } catch (error) {
-    res.send("something went wrong" + error.message);
+    res.send("Update failed!!  :" + error.message);
   }
 });
 
