@@ -2,6 +2,8 @@ const express = require("express");
 const { connectDB } = require("./config/database");
 const User = require("./model/user");
 const app = express();
+const validatior = require("validator");
+const { default: isEmail } = require("validator/lib/isEmail");
 
 // Middleware to convert JSON data to JS object
 app.use(express.json());
@@ -12,6 +14,10 @@ app.post("/signup", async (req, res) => {
   const user = new User(req.body);
 
   try {
+    // email validation for(correct email format)
+    if(! isEmail(user.emailId)){
+      throw new Error("Email is not valid")
+    }
     await user.save();
     res.send("User created successfully ");
   } catch (error) {
@@ -69,7 +75,7 @@ app.delete("/user", async (req, res) => {
 // update API for one user
 app.patch("/user/:userId", async (req, res) => {
   const userId = req.params?.userId;
-  console.log(userId)
+  // console.log(userId)
   const data = req.body;
 
   try {
