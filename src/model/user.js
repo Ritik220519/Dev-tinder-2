@@ -16,7 +16,14 @@ const userSchema = new mongoose.Schema({
         required: true,
         lowercase : true,
         unique : true,
-        trim : true
+        trim : true,
+        validate(value){
+            if(! validator.isEmail(value)){
+                throw new Error("Email is not valid" + value)
+
+            }
+        }
+
     },
     password : {
         type : String,
@@ -60,7 +67,12 @@ const userSchema = new mongoose.Schema({
         }
     },
     skills : {
-        type : [String]
+        type : [String],
+        validate(value){
+            if(value.length > 10){
+                throw new Error("You can add only 10 skills")
+            }
+        }
     }
 } , {timestamps : true});
 

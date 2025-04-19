@@ -2,22 +2,48 @@ const express = require("express");
 const { connectDB } = require("./config/database");
 const User = require("./model/user");
 const app = express();
-const validatior = require("validator");
-const { default: isEmail } = require("validator/lib/isEmail");
+const { validateSignupData } = require("./utils/validate");
+const bcrypt = require("bcrypt");
 
 // Middleware to convert JSON data to JS object
 app.use(express.json());
 
 app.post("/signup", async (req, res) => {
-  // we can see data in the console
-  console.log(req.body);
-  const user = new User(req.body);
+  
 
   try {
-    // email validation for(correct email format)
-    if(! isEmail(user.emailId)){
-      throw new Error("Email is not valid")
-    }
+    // validate the data
+    validateSignupData(req);
+    
+    const {
+      firstName,
+      lastName,
+      emailId,
+      password,
+      age,
+      gender,
+      skills,
+      about,
+      photoUrl,
+    } = req.body;
+
+    // Encrypt the password
+    const passwordHash = await bcrypt.hash(password, 10);
+    console.log(passwordHash);
+
+    // create the new Instance of user model
+    const user = new User({
+      firstName,
+      lastName,
+      emailId,
+      password: passwordHash,
+      age,
+      gender,
+      skills,
+      about,
+      photoUrl,
+    });
+
     await user.save();
     res.send("User created successfully ");
   } catch (error) {
@@ -88,17 +114,16 @@ app.patch("/user/:userId", async (req, res) => {
       "skills",
     ];
 
-    const isUpdateAllowed = Object
-      .keys(data)
-      .every((k) => ALLOWED_UPDATES.includes(k));
+    const isUpdateAllowed = Object.keys(data).every((k) =>
+      ALLOWED_UPDATES.includes(k)
+    );
 
     if (!isUpdateAllowed) {
       throw new Error("Invalid update data");
     }
 
-    if(data.skills.length > 10){
-      throw new Error("You can add only 10 skills")
-
+    if (data.skills.length > 10) {
+      throw new Error("You can add only 10 skills");
     }
     const user = await User.findByIdAndUpdate({ _id: userId }, data, {
       returnDocument: "before",
