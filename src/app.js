@@ -5,7 +5,7 @@ const app = express();
 const { validateSignupData, validateLoginData } = require("./utils/validate");
 const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
-const jwt = require("jsonwebtoken");
+
 const { userAuth } = require("./middleware/auth.js");
 
 // Middleware to convert JSON data to JS object
@@ -54,7 +54,7 @@ app.post("/signup", async (req, res) => {
 });
 
 // login API
-app.post("/login",  async (req, res) => {
+app.post("/login", async (req, res) => {
   try {
     const { emailId, password } = req.body;
     // validate the data
@@ -64,18 +64,19 @@ app.post("/login",  async (req, res) => {
     if (!user) {
       throw new Error("Invalid credentials");
     }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    // compare the password
+    const isPasswordValid = await user.validatePassword(password);
 
     if (!isPasswordValid) {
       throw new Error("Invalid credentials");
     } else {
       // create a JWT token here
-      const token = await jwt.sign({ _id: user._id }, "DevTinder@SecretKey");
-      console.log("token are :", token);
+      const token = await user.getJWT();
 
       // Add the Token to cookie and send the response back to the user
-      res.cookie("token", token);
+      res.cookie("token", token, {
+        expires: new Date(Date.now() + 8 * 3600000),
+      });
       res.send("Login successful ");
     }
   } catch (error) {
@@ -84,7 +85,7 @@ app.post("/login",  async (req, res) => {
 });
 
 // get profile
-app.get("/profile",userAuth , async (req, res) => {
+app.get("/profile", userAuth, async (req, res) => {
   try {
     const user = req.user;
     res.send(user);
@@ -93,92 +94,14 @@ app.get("/profile",userAuth , async (req, res) => {
   }
 });
 
-// get API for one user
-app.get("/user", async (req, res) => {
-  const userEmail = req.body.emailId;
+// sending connection request
 
+app.post("/sendingconnectionrequest", userAuth, async (req, res) => {
   try {
-    const user = await User.findOne({ emailId: userEmail });
-    if (!user) {
-      res.status(400).send("user not found");
-    } else {
-      res.send(user);
-    }
+    const user = req.user;
+    res.send(user.firstName + " sent request ");
   } catch (error) {
-    res.status(400).send("something went wrong" + error.message);
-  }
-});
-
-// get API for all the users (feed)
-app.get("/feed", async (req, res) => {
-  try {
-    const users = await User.find({});
-
-    if (!users) {
-      res.status(400).send("No users found");
-    } else {
-      res.send(users);
-    }
-  } catch (error) {
-    res.status(400).send("something went wrong" + error.message);
-  }
-});
-
-// delete API for one user
-
-app.delete("/user", async (req, res) => {
-  const userId = req.body.userId;
-  try {
-    const user = await User.findByIdAndDelete({ _id: userId });
-    if (!user) {
-      res.status(400).send("user not Available");
-    } else {
-      res.send("User deleted successfully");
-    }
-  } catch (error) {
-    res.send("something went wrong" + error.message);
-  }
-});
-
-// update API for one user
-app.patch("/user/:userId", async (req, res) => {
-  const userId = req.params?.userId;
-  // console.log(userId)
-  const data = req.body;
-
-  try {
-    const ALLOWED_UPDATES = [
-      "userId",
-      "age",
-      "about",
-      "gender",
-      "photoUrl",
-      "skills",
-    ];
-
-    const isUpdateAllowed = Object.keys(data).every((k) =>
-      ALLOWED_UPDATES.includes(k)
-    );
-
-    if (!isUpdateAllowed) {
-      throw new Error("Invalid update data");
-    }
-
-    if (data.skills.length > 10) {
-      throw new Error("You can add only 10 skills");
-    }
-    const user = await User.findByIdAndUpdate({ _id: userId }, data, {
-      returnDocument: "before",
-      runValidators: true,
-    });
-    // console.log(user);
-    if (!user) {
-      res.status(400).send("user not found");
-    } else {
-      res.send("User updated successfully");
-    }
-  } catch (error) {
-    res.send("Update failed!!  :" + error.message);
+    res.send("Error : " + error.message);
   }
 });
 
