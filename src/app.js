@@ -6,6 +6,7 @@ const { validateSignupData, validateLoginData } = require("./utils/validate");
 const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
+const { userAuth } = require("./middleware/auth.js");
 
 // Middleware to convert JSON data to JS object
 app.use(express.json());
@@ -53,7 +54,7 @@ app.post("/signup", async (req, res) => {
 });
 
 // login API
-app.post("/login", async (req, res) => {
+app.post("/login",  async (req, res) => {
   try {
     const { emailId, password } = req.body;
     // validate the data
@@ -83,27 +84,10 @@ app.post("/login", async (req, res) => {
 });
 
 // get profile
-app.get("/profile", async (req, res) => {  
+app.get("/profile",userAuth , async (req, res) => {
   try {
-    // get the token from cookie
-    const cookie = req.cookies;
-    const { token } = cookie;
-    if (!token) {
-      throw new Error("Invalid token");
-    }
-    // verify the token and get the user id 
-    const decodedMessage = await jwt.verify(token, "DevTinder@SecretKey");
-    const { _id } = decodedMessage;
-    console.log("user id is", _id);
-    console.log("cookie are", cookie);
-
-    // find the user by id
-    const user = await User.findById({ _id: _id });
-    if (!user) {
-      throw new Error("user does nit exsit");
-    } else {
-      res.send(user);
-    }
+    const user = req.user;
+    res.send(user);
   } catch (error) {
     res.status(400).send("Error : " + error.message);
   }
