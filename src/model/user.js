@@ -78,6 +78,7 @@ const userSchema = new mongoose.Schema({
     }
 } , {timestamps : true});
 
+// create JWT Token
 userSchema.methods.getJWT = async function(){
 
     const user = this;
@@ -88,7 +89,7 @@ userSchema.methods.getJWT = async function(){
     return token;
 
 }
-
+// Compare the password
 userSchema.methods.validatePassword = async function(passwordInputByUser){
 
     const user = this;
