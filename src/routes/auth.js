@@ -6,8 +6,8 @@ const User = require("../model/user");
 
 authRouter.post("/signup", async (req, res) => {
   try {
-    validateSignupData(req);
     const { firstName, lastName, emailId, password, age, skills } = req.body;
+    validateSignupData(req);
 
     const passwordHash = await bcrypt.hash(password, 10);
     const user = new User({
@@ -43,12 +43,14 @@ authRouter.post("/login", async (req, res) => {
       res.cookie("token", token);
       res.send("User logged in successfully ");
     }
-
-  
   } catch (error) {
     res.status(500).send("Error in Login user: " + error.message);
   }
 });
-
+authRouter.post("/logout", async (req, res) => {
+  res
+    .cookie("token", null, { expires: new Date(Date.now()) })
+    .send("Logout successfull");
+});
 
 module.exports = authRouter;
