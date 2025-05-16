@@ -11,8 +11,11 @@ profileRouter
  - PATCH /profile/password
 
 connectionRequestRouter
+                        /status
  - POST /request/send/intersted/:userId
  - POST /request/send/ignored/:userId
+ 
+                        status
  - POST /request/send/accepted/:requestId
  - POST /request/send/rejected/:requestId 
 

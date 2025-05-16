@@ -21,7 +21,7 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
     }
 
     const loggedInUser = req.user;
-    console.log("patch" + loggedInUser);
+    // console.log("patch" + loggedInUser);
 
     //  loggedInUser.firstName = req.body.firstName;
     //  loggedInUser.lastName = req.body.lastName;
